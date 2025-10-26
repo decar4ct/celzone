@@ -687,4 +687,185 @@ function render(){
   ctx.fillStyle="black"
   ctx.fillRect(0,0,csize,csize)
   update()
-  renderlin
+  renderline()
+  renderMinimap()
+  
+  shapes.forEach((s,i) => {
+    if(s.x>cam.x&&s.x<cam.x+csize&&s.y>cam.y&&s.y<cam.y+csize){
+      s.draw()
+    }
+  })
+  bullets.forEach((b,i) => {
+    if(b.age>b.ltime){
+      bullets.splice(i,1)
+    }
+  })
+  bullets.forEach((b,i) => {
+    b.update()
+    if(b.x>cam.x&&b.x<cam.x+csize&&b.y>cam.y&&b.y<cam.y+csize){
+      b.draw()
+    }
+  })
+  tanks.forEach((t,i) => {
+    if(t.hp<=0.001){
+      tanks.splice(i,1)
+      logchat("<t"+t.team+">"+t.name+" was killed by <t"+(t.team==0?1:0)+">"+t.dmgby)
+      if(t.dmgby=="you"){
+        kill++
+      }
+      if(t.team==0){
+        tanks.push(new Tank(Math.random()*canvas.width*1,Math.random()*canvas.height*5,0,Math.floor(Math.random()*9)))
+      }else{
+        tanks.push(new Tank(Math.random()*canvas.width*1+canvas.width*4+canvas.width*2.5,Math.random()*canvas.height*5,1,Math.floor(Math.random()*9)))
+      }
+    }
+    if(despawning&&Math.sqrt((t.x-user.x)**2+(t.y-user.y)**2)>1700){
+      const randr=Math.random()*Math.PI*2
+      tanks.splice(i,1)
+      let newt=t
+      newt.x=Math.sin(randr)*1400+user.x
+      newt.y=Math.cos(randr)*1400+user.y
+      tanks.push(newt)
+    }
+  })
+  tanks.forEach((t,i) => {
+    t.update()
+    if(t.x>cam.x-50&&t.x<cam.x+csize+50&&t.y>cam.y-50&&t.y<cam.y+csize+50){
+      t.draw()
+    }
+  })
+  
+  drawUser()
+  
+  renderUi()
+  ctx.fillStyle="white"
+  ctx.font="30px Arial"
+  ctx.textAlign="left"
+  ctx.textBaseline="top"
+  const chatsplit=chatlog.split("<br>")
+  ctx.fillText("x:"+Math.floor(user.x)+" y:"+Math.floor(user.y),0,0)
+  for(let i=0;i<chatsplit.length;i++){
+    const wsplit=chatsplit[i].split(" ")
+    let wordx=0
+    for(let j=0;j<wsplit.length;j++){
+      let word=wsplit[j]
+      let col="white"
+      if(word.slice(0,2)=="<t"){
+        col=teamcol[word[2]]
+        word=word.slice(4)
+      }
+      ctx.fillStyle=col
+      ctx.fillText(word,wordx,30*(i+1))
+      wordx+=ctx.measureText(word+" ").width
+    }
+  }
+  ctx.fillStyle="red"
+  ctx.textAlign="right"
+  ctx.fillText("WORK IN PROGRESS",csize,0)
+  ctx.fillStyle="rgba(255,255,255,0.3)"
+  ctx.textAlign="center"
+  ctx.fillText("Offline Mode",csize/2,0)
+  ctx.fillStyle="rgba(255,255,255,0.5)"
+  ctx.textAlign="left"
+  ctx.textBaseline="bottom"
+  ctx.fillText("Kills: "+kill,0,csize-30)
+  ctx.fillText("Deaths: "+death,0,csize)
+
+  if(user.hp<=0.001){
+    logchat("<t"+user.team+">"+"you"+" was killed by <t"+(user.team==0?1:0)+">"+user.dmgby)
+    death++
+    user={x:Math.random()*canvas.width*1,y:Math.random()*canvas.height*5.5,r:0,vx:0,vy:0,br:0,rel:0,baserel:20,team:0,hp:1,rad:20,type:Math.floor(Math.random()*9),basedmg:0.08,basespd:0.7}
+  }
+  requestAnimationFrame(render)
+}
+render()
+
+function tapPos(event) {
+  const rect=canvas.getBoundingClientRect()
+  let x
+  let y
+  if(event.touches) {
+    x=event.touches[0].clientX-rect.left
+    y=event.touches[0].clientY-rect.top
+  }else{
+    x=event.clientX-rect.left
+    y=event.clientY-rect.top
+  }
+  return{x:x+camx,y:y+camy}
+}
+uican.addEventListener('touchstart',(e) =>{
+  let touchl=null,touchr=null
+  if(e.touches[0].clientX-uican.offsetLeft<uican.width/2){
+    touchl=e.touches[0]
+    touchr=e.touches[1]
+  }else{
+    touchl=e.touches[1]
+    touchr=e.touches[0]
+  }
+  if(touchl&&!jstick.ld){
+    const x=touchl.clientX-uican.offsetLeft
+    const y=touchl.clientY-uican.offsetTop
+    jstick.lx=x
+    jstick.ly=y
+    jstick.lxx=x
+    jstick.lyy=y
+    jstick.ld=true
+  }
+  if(touchr&&!jstick.rd){
+    const x=touchr.clientX-uican.offsetLeft
+    const y=touchr.clientY-uican.offsetTop
+    jstick.rx=x
+    jstick.ry=y
+    jstick.rd=true
+  }
+})
+uican.addEventListener('touchmove',(e) =>{
+  e.preventDefault()
+  let touchl=null,touchr=null
+  if(e.touches[0].clientX-uican.offsetLeft<uican.width/2){
+    touchl=e.touches[0]
+    touchr=e.touches[1]
+  }else{
+    touchl=e.touches[1]
+    touchr=e.touches[0]
+  }
+  if(touchl){
+    const x=touchl.clientX-uican.offsetLeft
+    const y=touchl.clientY-uican.offsetTop
+    const dx=x-jstick.lx
+    const dy=y-jstick.ly
+    const dist=Math.max(1,Math.sqrt(dx*dx+dy*dy)/100)
+    jstick.lxx=dx/dist+jstick.lx
+    jstick.lyy=dy/dist+jstick.ly
+    if(x>450){
+      jstick.ld=false
+    }
+  }
+  if(touchr){
+    const x=touchr.clientX-uican.offsetLeft
+    const y=touchr.clientY-uican.offsetTop
+    const dx=x-jstick.rx
+    const dy=y-jstick.ry
+    const dist=Math.max(1,Math.sqrt(dx*dx+dy*dy)/100)
+    jstick.rxx=dx/dist+jstick.rx
+    jstick.ryy=dy/dist+jstick.ry
+    if(x<uican.width-450){
+      jstick.rd=false
+    }
+  }
+})
+uican.addEventListener('touchend',(e)=> {
+  let touchl=null,touchr=null
+  if(e.changedTouches[0].clientX-uican.offsetLeft<uican.width/2){
+    touchl=e.changedTouches[0]
+    touchr=e.changedTouches[1]
+  }else{
+    touchl=e.changedTouches[1]
+    touchr=e.changedTouches[0]
+  }
+  if(touchl)jstick.ld=false
+  if(touchr)jstick.rd=false
+})
+
+document.addEventListener('keydown',e=> keys[e.key]=true)
+document.addEventListener('keyup',e=> keys[e.key]=false)
