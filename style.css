@@ -1,0 +1,34 @@
+body {
+    font-size: 15pt;
+    background-color: black;
+    color: white;
+}
+
+#canvas{
+    filter: contrast(150%);
+}
+
+.key{
+    width: 80px;
+    font-size: 50px;
+    background-color: black;
+    color: white;
+}
+#keyb1{
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    width: 1000px;
+}
+#keyb2{
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    width: 1000px;
+}
+#keyb3{
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    width: 1000px;
+}
