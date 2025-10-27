@@ -18,7 +18,7 @@ let shapes=[]
 let bullets=[]
 let tanks=[]
 
-const botcount=20
+const botcount=15
 
 let kill=0,death=0
 let keyshow=false
