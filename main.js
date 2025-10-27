@@ -12,13 +12,13 @@ const mapsize=csize*5
 let user={x:Math.random()*mapsize/5,y:Math.random()*mapsize,r:0,vx:0,vy:0,br:0,rel:0,baserel:20,team:0,hp:1,rad:20,type:0,basedmg:0.08,basespd:0.7,dmgby:undefined}
 let cam={x:user.x-csize/2,y:user.y-csize/2}
 
-let jstick={lx:undefined,ly:undefined,rx:undefined,ry:undefined}
+let jstick={lx:uican.width/4,ly:uican.height/2,rx:uican.width/4*3,ry:uican.height/2,lxx:uican.width/4,lyy:uican.height/2,rxx:uican.width/4*3,ryy:uican.height/2,ld:true,rd:true}
 
 let shapes=[]
 let bullets=[]
 let tanks=[]
 
-const botcount=50
+const botcount=20
 
 let kill=0,death=0
 let keyshow=false
@@ -26,8 +26,8 @@ let keyshow=false
 const despawning=false
 let chatlog=""
 
-const usernames=["progamer420","Nobody","nyl","Itzcraft","AZZ","私は勝者だ","err","THEBIGHITTER","Death","iliketrains","sybau","4","67","qwerty","hjsjjsk","beans","TERRIFYING","Nma","theworldwelivein","Coconut","donut","wongwsskkok","Nanzz","Cecep","बिंगचिलिंग","thosewhoknow","uwu","Fragg","Gunner","STILLWATER","Stev","betterthanu","TheChosenOne","XiJinping","Flux","김정은","Redd","TheDarkLord","arachnophobic","123","MagnusCarlsen",":/","gshdhsuj","noone","goodatthisgame","Unnamed","Aleron124","Yahyaaa","topsingko","Technoblade","dream","xD","OwO","HikaruNakamura","iam",
-  "thatoneguy","Farhan","Siti","sucipto","skibidi","tungtungtung","THE4","#","noob67","newname","nama","HORANGjawa","Путин","HITLAR","Niga","aaaaaaa","dfvhikhg"
+const usernames=["progamer420","Nobody","nyl","Itzcraft","AZZ","私は勝者だ","err","THEBIGHITTER","Death","iliketrains","sybau","4","67","qwerty","hjsjjsk","beans","TERRIFYING","Nma","theworldwelivein","Coconut","donut","wongwsskkok","Nanzz","Cecep","बिंगचिलिंग","thosewhoknow","uwu","Fragg","Gunner","STILLWATER","Stev","betterthanu","TheChosenOne","XiJinping","Flux","김정은","Redd","TheDarkLord","arachnophobic","123","CagnusMarlsen",":/","gshdhsuj","noone","goodatthisgame","Unnamed","yarrrr","Yahyaaa","topsingko","Technoblade","dream","xD","OwO","wiwiwi","iam",
+  "thatoneguy","Farhan","Siti","sucipto","skibidi","tungtungtung","THE4","#","noob67","newname","nama","HORANGjawa","Путин","HITLAR","igga","aaaaaaa","dfvhikhg"
 ]
 
 let teamcol=["rgb(0,170,255)","rgb(255,50,0)"]
@@ -806,7 +806,7 @@ function render(){
   if(user.hp<=0.001){
     logchat("<t"+user.team+">"+"you"+" was killed by <t"+(user.team==0?1:0)+">"+user.dmgby)
     death++
-    user={x:Math.random()*canvas.width*1,y:Math.random()*canvas.height*5.5,r:0,vx:0,vy:0,br:0,rel:0,baserel:20,team:0,hp:1,rad:20,type:Math.floor(Math.random()*9),basedmg:0.08,basespd:0.7}
+    user={x:Math.random()*mapsize/5,y:Math.random()*mapsize,r:0,vx:0,vy:0,br:0,rel:0,baserel:20,team:0,hp:1,rad:20,type:Math.floor(Math.random()*9),basedmg:0.08,basespd:0.7}
   }
   
   document.getElementById("keyb").style.display=(keyshow?"block":"none")
@@ -829,6 +829,7 @@ function tapPos(event) {
   return{x:x+camx,y:y+camy}
 }
 uican.addEventListener('touchstart',(e) =>{
+  e.preventDefault()
   let touchl=null,touchr=null
   if(e.touches[0].clientX-uican.offsetLeft<uican.width/2){
     touchl=e.touches[0]
@@ -890,6 +891,7 @@ uican.addEventListener('touchmove',(e) =>{
   }
 })
 uican.addEventListener('touchend',(e)=> {
+  e.preventDefault()
   let touchl=null,touchr=null
   if(e.changedTouches[0].clientX-uican.offsetLeft<uican.width/2){
     touchl=e.changedTouches[0]
