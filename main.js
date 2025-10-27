@@ -2,9 +2,14 @@ const canvas=document.getElementById("canvas")
 const ctx=canvas.getContext("2d")
 const uican=document.getElementById("uican")
 const utx=uican.getContext("2d")
-const csize=(canvas.width+canvas.height)/2
+const csize=1000
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+uican.style.top=`${window.innerHeight-500}px`
+uican.style.width=window.innerWidth
 
-let user={x:Math.random()*canvas.width*1,y:Math.random()*canvas.height*5.5,r:0,vx:0,vy:0,br:0,rel:0,baserel:20,team:0,hp:1,rad:20,type:0,basedmg:0.08,basespd:0.7,dmgby:undefined}
+const mapsize=csize*5
+let user={x:Math.random()*mapsize/5,y:Math.random()*mapsize,r:0,vx:0,vy:0,br:0,rel:0,baserel:20,team:0,hp:1,rad:20,type:0,basedmg:0.08,basespd:0.7,dmgby:undefined}
 let cam={x:user.x-csize/2,y:user.y-csize/2}
 
 let jstick={lx:undefined,ly:undefined,rx:undefined,ry:undefined}
@@ -13,13 +18,17 @@ let shapes=[]
 let bullets=[]
 let tanks=[]
 
+const botcount=50
+
 let kill=0,death=0
+let keyshow=false
 
 const despawning=false
 let chatlog=""
-const mapsize=csize*5
 
-const usernames=["progamer420","Nobody","nyl","Itzcraft","AZZ","私は勝者だ","err","THEBIGHITTER","Death","iliketrains","sybau","4","67","qwerty","hjsjjsk","beans","TERRIFYING","Nma","theworldwelivein","Coconut","donut","wongwsskkok","Nanzz","Cecep","बिंगचिलिंग","thosewhoknow","uwu","Fragg","Gunner","STILLWATER","Stev","betterthanu","TheChosenOne","XiJinping","Flux","김정은","Redd","TheDarkLord","arachnophobic","123","MagnusCarlsen",":/","gshdhsuj","noone","goodatthisgame","Unnamed","Aleron124","Yahyaaa","topsingko","Technoblade","dream","xD","OwO","HikaruNakamura"]
+const usernames=["progamer420","Nobody","nyl","Itzcraft","AZZ","私は勝者だ","err","THEBIGHITTER","Death","iliketrains","sybau","4","67","qwerty","hjsjjsk","beans","TERRIFYING","Nma","theworldwelivein","Coconut","donut","wongwsskkok","Nanzz","Cecep","बिंगचिलिंग","thosewhoknow","uwu","Fragg","Gunner","STILLWATER","Stev","betterthanu","TheChosenOne","XiJinping","Flux","김정은","Redd","TheDarkLord","arachnophobic","123","MagnusCarlsen",":/","gshdhsuj","noone","goodatthisgame","Unnamed","Aleron124","Yahyaaa","topsingko","Technoblade","dream","xD","OwO","HikaruNakamura","iam",
+  "thatoneguy","Farhan","Siti","sucipto","skibidi","tungtungtung","THE4","#","noob67","newname","nama","HORANGjawa","Путин","HITLAR","Niga","aaaaaaa","dfvhikhg"
+]
 
 let teamcol=["rgb(0,170,255)","rgb(255,50,0)"]
 
@@ -102,7 +111,7 @@ function getName(uid){
     let shufUsers=structuredClone(usernames)
     let hash=sHash(uid)*parseInt(uid,16)
     shufUsers.sort(()=>(hash*Math.PI)%1-0.5)
-    return usernames[Math.floor(hash)%usernames.length]
+    return usernames[Math.floor(hash)%usernames.length]+""+sHash(uid)%999
   }else{
     return "you"
   }
@@ -278,7 +287,19 @@ class Tank{
     
     this.baserel=20
     this.hp=1
-    this.name=usernames[Math.floor(Math.random()*usernames.length)]
+    let stop=false
+    for(let i=0;i<100;i++){
+      this.name=usernames[Math.floor(Math.random()*usernames.length)]
+      stop=true
+      tanks.forEach((t,i) => {
+        if(t.name==this.name){
+          stop=false
+        }
+      })
+      if(stop){
+        break
+      }
+    }
   }
   draw(){
     let col="white"
@@ -487,13 +508,13 @@ class Shape{
   }
 }
 for (let i=0;i<100;i++) {
-  shapes.push(new Shape(Math.random()*canvas.width*5,Math.random()*canvas.height*5,Math.floor(Math.random()*2)+3))
+  shapes.push(new Shape(Math.random()*mapsize,Math.random()*mapsize,Math.floor(Math.random()*2)+3))
 }
-for (let i=0;i<15;i++) {
-  tanks.push(new Tank(Math.random()*canvas.width*1+canvas.width*4,Math.random()*canvas.height*5,1,Math.floor(Math.random()*9)))
+for (let i=0;i<botcount;i++) {
+  tanks.push(new Tank(Math.random()*mapsize/5+mapsize/5*4,Math.random()*mapsize*5,1,Math.floor(Math.random()*9)))
 }
-for (let i=0;i<14;i++) {
-  tanks.push(new Tank(Math.random()*canvas.width*1,Math.random()*canvas.height*5,0,Math.floor(Math.random()*9)))
+for (let i=0;i<botcount;i++) {
+  tanks.push(new Tank(Math.random()*mapsize/5,Math.random()*mapsize*5,0,Math.floor(Math.random()*9)))
 }
 
 function drawUser(){
@@ -530,35 +551,35 @@ function renderMinimap(){
   const mmsize=150
   const margin=10
   ctx.fillStyle="rgba(255,255,255,0.3)"
-  ctx.fillRect(csize-mmsize-margin,csize-mmsize-margin,mmsize,mmsize)
+  ctx.fillRect(canvas.width-mmsize-margin,canvas.height-mmsize-margin,mmsize,mmsize)
   ctx.fillStyle="rgba(0,100,255,0.3)"
-  ctx.fillRect(csize-mmsize-margin,csize-mmsize-margin,mmsize/4,mmsize)
+  ctx.fillRect(canvas.width-mmsize-margin,canvas.height-mmsize-margin,mmsize/4,mmsize)
   ctx.fillStyle="rgba(255,0,0,0.3)"
-  ctx.fillRect(csize-mmsize-margin+mmsize/4*3,csize-mmsize-margin,mmsize/4,mmsize)
+  ctx.fillRect(canvas.width-mmsize-margin+mmsize/4*3,canvas.height-mmsize-margin,mmsize/4,mmsize)
   
   ctx.strokeStyle="rgba(255,255,255,0.5)"
   ctx.lineWidth=2
   ctx.beginPath()
-  ctx.moveTo(user.x/mapsize*mmsize+csize-mmsize-margin,csize-mmsize-margin)
-  ctx.lineTo(user.x/mapsize*mmsize+csize-mmsize-margin,csize-margin)
+  ctx.moveTo(user.x/mapsize*mmsize+canvas.width-mmsize-margin,canvas.height-mmsize-margin)
+  ctx.lineTo(user.x/mapsize*mmsize+canvas.width-mmsize-margin,canvas.height-margin)
   ctx.stroke()
   
   ctx.beginPath()
-  ctx.moveTo(csize-mmsize-margin,user.y/mapsize*mmsize+csize-mmsize-margin)
-  ctx.lineTo(csize-margin,user.y/mapsize*mmsize+csize-mmsize-margin)
+  ctx.moveTo(canvas.width-mmsize-margin,user.y/mapsize*mmsize+canvas.height-mmsize-margin)
+  ctx.lineTo(canvas.width-margin,user.y/mapsize*mmsize+canvas.height-mmsize-margin)
   ctx.stroke()
   
   ctx.fillStyle="rgba(255,255,255,0.5)"
   ctx.font="20px Arial"
   ctx.textBaseline="bottom"
   ctx.textAlign="center"
-  ctx.fillText("MINIMAP",csize-margin-mmsize/2,csize-mmsize-margin)
+  ctx.fillText("MINIMAP",canvas.width-margin-mmsize/2,canvas.height-mmsize-margin)
 }
 function renderUi(){
   utx.fillStyle="black"
-  utx.fillRect(0,0,uican.width,uican.height)
+  utx.clearRect(0,0,uican.width,uican.height)
   renderJoystick()
-  utx.strokeStyle="rgba(255,255,255,0.2)"
+  utx.strokeStyle="rgba(255,255,255,0.1)"
   utx.lineWidth=5
   utx.beginPath()
   utx.moveTo(uican.width/2,0)
@@ -567,7 +588,7 @@ function renderUi(){
 }
 function renderline(){
   ctx.lineWidth=1
-  for(let i=-cam.x;i<csize;i+=100){
+  for(let i=-cam.x;i<canvas.width;i+=100){
     if(i+cam.x<mapsize+1){
       if(Math.floor((i+cam.x)/100)%10==0){
         ctx.strokeStyle="rgba(255,255,255,1)"
@@ -576,11 +597,11 @@ function renderline(){
       }
       ctx.beginPath()
       ctx.moveTo(i,0)
-      ctx.lineTo(i,csize)
+      ctx.lineTo(i,canvas.height)
       ctx.stroke()
     }
   }
-  for(let i=-cam.y;i<csize;i+=100){
+  for(let i=-cam.y;i<canvas.height;i+=100){
     if(i+cam.y<mapsize+1){
       if(Math.floor((i+cam.y)/100)%10==0){
         ctx.strokeStyle="rgba(255,255,255,1)"
@@ -589,7 +610,7 @@ function renderline(){
       }
       ctx.beginPath()
       ctx.moveTo(0,i)
-      ctx.lineTo(csize,i)
+      ctx.lineTo(canvas.width,i)
       ctx.stroke()
     }
   }
@@ -619,11 +640,15 @@ function renderJoystick(){
   }
 }
 function moveUser(){
-  if(jstick.ld||keys.w||keys.a||keys.s||keys.d){
+  if(jstick.ld){
     const mx=(jstick.lxx-jstick.lx)||0
     const my=(jstick.lyy-jstick.ly)||0
-    user.vx+=mx*0.01*user.basespd+(keys.a?-1:0)+(keys.d?1:0)
-    user.vy+=my*0.01*user.basespd+(keys.w?-1:0)+(keys.s?1:0)
+    user.vx+=mx*0.01*user.basespd
+    user.vy+=my*0.01*user.basespd
+  }
+  if(keys.w||keys.a||keys.s||keys.d){
+    user.vx+=user.basespd*((keys.a?-1:0)+(keys.d?1:0))
+    user.vy+=user.basespd*((keys.w?-1:0)+(keys.s?1:0))
   }
   if(user.x<0){
     user.vx+=1
@@ -676,8 +701,8 @@ function moveUser(){
 }
 function update(){
   moveUser()
-  const cx=user.x-csize/2+(jstick.rd?Math.sin(user.br)*Math.abs(jstick.rxx-jstick.rx)*2||0:0)
-  const cy=user.y-csize/2+(jstick.rd?Math.cos(user.br)*Math.abs(jstick.ryy-jstick.ry)*2||0:0)
+  const cx=user.x-canvas.width/2+(jstick.rd?Math.sin(user.br)*Math.abs(jstick.rxx-jstick.rx)*2||0:0)
+  const cy=user.y-canvas.height/2+(jstick.rd?Math.cos(user.br)*Math.abs(jstick.ryy-jstick.ry)*2||0:0)
   cam.x+=(cx-cam.x)*0.1
   cam.y+=(cy-cam.y)*0.1
   user.rel--
@@ -685,13 +710,13 @@ function update(){
 }
 function render(){
   ctx.fillStyle="black"
-  ctx.fillRect(0,0,csize,csize)
+  ctx.fillRect(0,0,canvas.width,canvas.height)
   update()
   renderline()
   renderMinimap()
   
   shapes.forEach((s,i) => {
-    if(s.x>cam.x&&s.x<cam.x+csize&&s.y>cam.y&&s.y<cam.y+csize){
+    if(s.x>cam.x&&s.x<cam.x+canvas.width&&s.y>cam.y&&s.y<cam.y+canvas.height){
       s.draw()
     }
   })
@@ -702,7 +727,7 @@ function render(){
   })
   bullets.forEach((b,i) => {
     b.update()
-    if(b.x>cam.x&&b.x<cam.x+csize&&b.y>cam.y&&b.y<cam.y+csize){
+    if(b.x>cam.x&&b.x<cam.x+canvas.width&&b.y>cam.y&&b.y<cam.y+canvas.height){
       b.draw()
     }
   })
@@ -714,9 +739,9 @@ function render(){
         kill++
       }
       if(t.team==0){
-        tanks.push(new Tank(Math.random()*canvas.width*1,Math.random()*canvas.height*5,0,Math.floor(Math.random()*9)))
+        tanks.push(new Tank(Math.random()*mapsize/5,Math.random()*mapsize,0,Math.floor(Math.random()*9)))
       }else{
-        tanks.push(new Tank(Math.random()*canvas.width*1+canvas.width*4+canvas.width*2.5,Math.random()*canvas.height*5,1,Math.floor(Math.random()*9)))
+        tanks.push(new Tank(Math.random()*mapsize/5+mapsize/5*4+canvas.width*2.5,Math.random()*mapsize,1,Math.floor(Math.random()*9)))
       }
     }
     if(despawning&&Math.sqrt((t.x-user.x)**2+(t.y-user.y)**2)>1700){
@@ -730,7 +755,7 @@ function render(){
   })
   tanks.forEach((t,i) => {
     t.update()
-    if(t.x>cam.x-50&&t.x<cam.x+csize+50&&t.y>cam.y-50&&t.y<cam.y+csize+50){
+    if(t.x>cam.x-50&&t.x<cam.x+canvas.width+50&&t.y>cam.y-50&&t.y<cam.y+canvas.height+50){
       t.draw()
     }
   })
@@ -761,21 +786,31 @@ function render(){
   }
   ctx.fillStyle="red"
   ctx.textAlign="right"
-  ctx.fillText("WORK IN PROGRESS",csize,0)
+  ctx.fillText("WORK IN PROGRESS",canvas.width,0)
+  
+  ctx.fillStyle="rgba(255,0,0,0.8)"
+  ctx.font="20px Arial"
+  ctx.fillText("Website is made on mobile.",canvas.width,30)
+  ctx.fillText("Might not work perfectly on desktop.",canvas.width,50)
+  ctx.font="30px Arial"
+  
   ctx.fillStyle="rgba(255,255,255,0.3)"
   ctx.textAlign="center"
-  ctx.fillText("Offline Mode",csize/2,0)
+  ctx.fillText("Offline Mode",canvas.width/2,0)
   ctx.fillStyle="rgba(255,255,255,0.5)"
   ctx.textAlign="left"
   ctx.textBaseline="bottom"
-  ctx.fillText("Kills: "+kill,0,csize-30)
-  ctx.fillText("Deaths: "+death,0,csize)
+  ctx.fillText("Kills: "+kill,0,canvas.height-30)
+  ctx.fillText("Deaths: "+death,0,canvas.height)
 
   if(user.hp<=0.001){
     logchat("<t"+user.team+">"+"you"+" was killed by <t"+(user.team==0?1:0)+">"+user.dmgby)
     death++
     user={x:Math.random()*canvas.width*1,y:Math.random()*canvas.height*5.5,r:0,vx:0,vy:0,br:0,rel:0,baserel:20,team:0,hp:1,rad:20,type:Math.floor(Math.random()*9),basedmg:0.08,basespd:0.7}
   }
+  
+  document.getElementById("keyb").style.display=(keyshow?"block":"none")
+  
   requestAnimationFrame(render)
 }
 render()
@@ -837,7 +872,7 @@ uican.addEventListener('touchmove',(e) =>{
     const dist=Math.max(1,Math.sqrt(dx*dx+dy*dy)/100)
     jstick.lxx=dx/dist+jstick.lx
     jstick.lyy=dy/dist+jstick.ly
-    if(x>450){
+    if(x>uican.width/2-50){
       jstick.ld=false
     }
   }
@@ -849,7 +884,7 @@ uican.addEventListener('touchmove',(e) =>{
     const dist=Math.max(1,Math.sqrt(dx*dx+dy*dy)/100)
     jstick.rxx=dx/dist+jstick.rx
     jstick.ryy=dy/dist+jstick.ry
-    if(x<uican.width-450){
+    if(x<uican.width/2+50){
       jstick.rd=false
     }
   }
@@ -867,5 +902,6 @@ uican.addEventListener('touchend',(e)=> {
   if(touchr)jstick.rd=false
 })
 
-document.addEventListener('keydown',e=> keys[e.key]=true)
-document.addEventListener('keyup',e=> keys[e.key]=false)
+document.addEventListener("keydown",e=> keys[e.key]=true)
+document.addEventListener("keyup",e=> keys[e.key]=false)
+document.getElementById("keyshow").addEventListener("click",()=>keyshow=!keyshow)
