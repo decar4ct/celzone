@@ -677,7 +677,8 @@ function moveUser(){
         user.br-=0.1
       }
     }
-    if(true){
+    const jdist=Math.sqrt((jstick.rxx-jstick.rx)**2+(jstick.ryy-jstick.ry)**2)
+    if(jdist>10){
       if(user.rel<0){
         const brl=getBarrelType(user.type)
         const spc=getTypeSpecial(user.type)
